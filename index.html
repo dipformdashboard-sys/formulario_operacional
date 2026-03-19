@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<title>Abertura de Requisição</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#eef2f6;
+padding:40px;
+}
+
+.container{
+max-width:700px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+input,select,textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+background:#2563eb;
+color:white;
+border:none;
+padding:14px;
+width:100%;
+font-size:16px;
+border-radius:5px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Abertura de Requisição</h2>
+
+<form id="formulario" method="POST"
+action="https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec">
+
+<label>Solicitante</label>
+<input name="solicitante" required>
+
+<label>Lotação</label>
+<input name="lotacao" required>
+
+<label>Canal</label>
+<select name="canal">
+<option>Email</option>
+<option>Telefone</option>
+<option>WhatsApp</option>
+<option>Presencial</option>
+</select>
+
+<label>Tipo de Requisição</label>
+<input name="tipo" required>
+
+<label>Descrição</label>
+<textarea name="descricao" required></textarea>
+
+<label>Responsável</label>
+<input name="responsavel">
+
+<label>Participantes</label>
+<input name="participantes">
+
+<button type="submit">
+Registrar Requisição
+</button>
+
+</form>
+
+</div>
+<script>
+const form = document.getElementById("formulario");
+
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const dados = new FormData(form);
+
+  fetch("SUA_URL_DO_SCRIPT", {
+    method: "POST",
+    body: dados
+  })
+  .then(() => {
+    alert("Requisição registrada com sucesso!");
+    form.reset();
+  })
+  .catch(() => {
+    alert("Erro ao enviar.");
+  });
+});
+</script>
+</body>
+</html>
