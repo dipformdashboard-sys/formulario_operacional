@@ -43,6 +43,11 @@ border-radius:5px;
 cursor:pointer;
 }
 
+button:disabled{
+background:#9ca3af;
+cursor:not-allowed;
+}
+
 .msg{
 margin-top:15px;
 padding:10px;
@@ -58,6 +63,35 @@ color:#065f46;
 .erro{
 background:#fee2e2;
 color:#7f1d1d;
+}
+
+/* LOADING */
+.loading{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+display:none;
+}
+
+.spinner{
+width:50px;
+height:50px;
+border:5px solid #ddd;
+border-top:5px solid #2563eb;
+border-radius:50%;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
 }
 
 </style>
@@ -98,7 +132,7 @@ color:#7f1d1d;
 <label>Participantes</label>
 <input name="participantes">
 
-<button type="submit">Registrar Requisição</button>
+<button id="btnEnviar" type="submit">Registrar Requisição</button>
 
 </form>
 
@@ -106,14 +140,25 @@ color:#7f1d1d;
 
 </div>
 
+<!-- LOADING -->
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+</div>
+
 <script>
 const form = document.getElementById("formulario");
 const msg = document.getElementById("mensagem");
+const loading = document.getElementById("loading");
+const btn = document.getElementById("btnEnviar");
 
 form.addEventListener("submit", function(e){
   e.preventDefault();
 
   const dados = new FormData(form);
+
+  // 🔥 ativa loading
+  loading.style.display = "flex";
+  btn.disabled = true;
 
   fetch("https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec", {
     method: "POST",
@@ -129,6 +174,11 @@ form.addEventListener("submit", function(e){
     msg.style.display = "block";
     msg.className = "msg erro";
     msg.innerText = "Erro ao enviar requisição.";
+  })
+  .finally(() => {
+    // 🔥 desativa loading
+    loading.style.display = "none";
+    btn.disabled = false;
   });
 });
 </script>
