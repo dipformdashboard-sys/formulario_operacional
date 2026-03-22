@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard de Requisições</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  margin:0;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:5px;
+}
+
+.refresh{
+  text-align:center;
+  font-size:12px;
+  color:#94a3b8;
+  margin-bottom:20px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:12px;
+  border-radius:10px;
+  text-align:center;
+}
+
+.card p{
+  margin:0;
+  font-size:12px;
+  color:#94a3b8;
+}
+
+.card h2{
+  margin-top:5px;
+  font-size:22px;
+  color:#38bdf8;
+}
+
+.container{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:15px;
+}
+
+.coluna{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.box{
+  background:#1e293b;
+  padding:12px;
+  border-radius:10px;
+}
+
+.chart-container{
+  position:relative;
+  width:100%;
+  height:220px;
+}
+
+.chart-container.grande{
+  height:300px;
+}
+
+.table-box{
+  background:#1e293b;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+th,td{
+  padding:6px;
+  border-bottom:1px solid #334155;
+}
+
+th{
+  color:#38bdf8;
+}
+
+button{
+  background:#334155;
+  border:none;
+  color:white;
+  padding:5px 10px;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+@media(max-width:900px){
+  .container{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>📊 Sumário de atividades - Núcleo de Assuntos Prisionais (NAP)</h1>
+<div class="refresh">Polícia Civil da Bahia, cada vez mais forte!</div>
+
+<div class="cards">
+  <div class="card">
+    <p>Total</p>
+    <h2 id="total">0</h2>
+  </div>
+
+  <div class="card">
+    <p>Hoje</p>
+    <h2 id="hoje">0</h2>
+  </div>
+
+  <div class="card">
+    <p>Lotações</p>
+    <h2 id="lotacoes">0</h2>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="coluna">
+
+    <div class="box">
+      <h3>📍 Por Lotação</h3>
+      <div class="chart-container">
+        <canvas id="graficoLotacao"></canvas>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>📅 Por Data</h3>
+      <div class="chart-container grande">
+        <canvas id="graficoData"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="coluna">
+
+    <div class="box">
+      <h3>📡 Por Canal</h3>
+      <div class="chart-container">
+        <canvas id="graficoCanal"></canvas>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>🏆 Top Responsáveis</h3>
+      <div class="chart-container">
+        <canvas id="graficoResponsavel"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="table-box">
+  <h3>📄 Últimas Pesquisas</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Responsável</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+  <div id="paginacao"></div>
+</div>
+
+<script>
+const URL = "https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec";
+
+let charts = {};
+let dadosGlobais = [];
+let paginaAtual = 1;
+const porPagina = 10;
+
+function formatarData(d){
+  if(!d) return null;
+  const data = new Date(d);
+  if(isNaN(data)) return null;
+  return data.toISOString().split("T")[0];
+}
+
+function criarGrafico(id, tipo, labels, data){
+  if(charts[id]) charts[id].destroy();
+
+  charts[id] = new Chart(document.getElementById(id), {
+    type: tipo,
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
+
+function carregarDados(){
+
+fetch(URL)
+.then(r => r.json())
+.then(data => {
+
+  const rel = data.relatorio || [];
+  dadosGlobais = rel;
+
+  document.getElementById("total").innerText = rel.length;
+
+  const hoje = formatarData(new Date());
+
+  document.getElementById("hoje").innerText =
+    rel.filter(r => formatarData(r.data) === hoje).length;
+
+  // LOTAÇÃO
+  const lot = {};
+  rel.forEach(r => {
+    const k = r.lotacao || "Sem";
+    lot[k] = (lot[k] || 0) + 1;
+  });
+
+  document.getElementById("lotacoes").innerText = Object.keys(lot).length;
+
+  criarGrafico("graficoLotacao","bar",Object.keys(lot),Object.values(lot));
+
+  // DATA
+  const datas = {};
+  rel.forEach(r => {
+    const d = formatarData(r.data);
+    if(d){
+      datas[d] = (datas[d] || 0) + 1;
+    }
+  });
+
+  criarGrafico("graficoData","line",Object.keys(datas),Object.values(datas));
+
+  // CANAL
+  const canais = {};
+  rel.forEach(r => {
+    const k = r.canal || "Sem";
+    canais[k] = (canais[k] || 0) + 1;
+  });
+
+  criarGrafico("graficoCanal","doughnut",Object.keys(canais),Object.values(canais));
+
+  // RESPONSÁVEL
+  const resp = {};
+  rel.forEach(r => {
+    const k = r.responsavel || "Sem";
+    resp[k] = (resp[k] || 0) + 1;
+  });
+
+  const top = Object.entries(resp)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5);
+
+  criarGrafico("graficoResponsavel","bar",
+    top.map(i=>i[0]),
+    top.map(i=>i[1])
+  );
+
+  renderTabela();
+
+});
+}
+
+function renderTabela(){
+  const tabela = document.getElementById("tabela");
+  tabela.innerHTML = "";
+
+  const inicio = (paginaAtual-1)*porPagina;
+  const pagina = dadosGlobais.slice().reverse().slice(inicio, inicio+porPagina);
+
+  pagina.forEach(r=>{
+    tabela.innerHTML += `
+      <tr>
+        <td>${r.descricao || "-"}</td>
+        <td>${r.responsavel || "-"}</td>
+      </tr>
+    `;
+  });
+
+  renderPaginacao();
+}
+
+function renderPaginacao(){
+  const total = Math.ceil(dadosGlobais.length/porPagina);
+
+  document.getElementById("paginacao").innerHTML = `
+    <button onclick="mudarPagina(-1)">◀</button>
+    Página ${paginaAtual} de ${total}
+    <button onclick="mudarPagina(1)">▶</button>
+  `;
+}
+
+function mudarPagina(d){
+  const total = Math.ceil(dadosGlobais.length/porPagina);
+
+  paginaAtual += d;
+  if(paginaAtual<1) paginaAtual=1;
+  if(paginaAtual>total) paginaAtual=total;
+
+  renderTabela();
+}
+
+setInterval(carregarDados,60000);
+carregarDados();
+
+</script>
+
+</body>
+</html>
