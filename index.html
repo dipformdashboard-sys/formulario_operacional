@@ -3,10 +3,9 @@
 
 <head>
 <meta charset="UTF-8">
-<title>Abertura de Requisição</title>
+<title>Pesquisas Realizadas</title>
 
 <style>
-
 body{
 font-family:Arial, sans-serif;
 background:#eef2f6;
@@ -23,13 +22,42 @@ border-radius:12px;
 box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
 
+/* 🔷 TOPO */
+.topo{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:20px;
+}
+
+.logo{
+height:50px;
+}
+
+.menu{
+display:flex;
+gap:10px;
+}
+
+.menu a{
+text-decoration:none;
+background:#2563eb;
+color:white;
+padding:8px 15px;
+border-radius:6px;
+font-size:14px;
+}
+
+.menu a:hover{
+background:#1d4ed8;
+}
+
 h2{
 margin-bottom:25px;
 color:#1e293b;
 text-align:center;
 }
 
-/* GRID CORRIGIDO */
 .grid{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -75,39 +103,23 @@ width:100%;
 font-size:16px;
 border-radius:6px;
 cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-background:#1d4ed8;
 }
 
 button:disabled{
 background:#9ca3af;
-cursor:not-allowed;
 }
 
-/* MENSAGEM */
 .msg{
 margin-top:20px;
 padding:12px;
 border-radius:6px;
 display:none;
-font-size:14px;
 text-align:center;
 }
 
-.sucesso{
-background:#d1fae5;
-color:#065f46;
-}
+.sucesso{background:#d1fae5;color:#065f46;}
+.erro{background:#fee2e2;color:#7f1d1d;}
 
-.erro{
-background:#fee2e2;
-color:#7f1d1d;
-}
-
-/* LOADING */
 .loading{
 position:fixed;
 top:0;
@@ -136,13 +148,10 @@ animation:spin 1s linear infinite;
 100%{transform:rotate(360deg);}
 }
 
-/* RESPONSIVO */
 @media(max-width:700px){
-.grid{
-grid-template-columns:1fr;
+.grid{grid-template-columns:1fr;}
+.topo{flex-direction:column; gap:10px;}
 }
-}
-
 </style>
 </head>
 
@@ -150,7 +159,16 @@ grid-template-columns:1fr;
 
 <div class="container">
 
-<h2>Abertura de Requisição</h2>
+<!-- 🔷 TOPO COM LOGO E MENU -->
+<div class="topo">
+  <img src="logo.png" class="logo">
+  <div class="menu">
+    <a href="index.html">📋 Formulário</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+  </div>
+</div>
+
+<h2>Pesquisas Realizadas</h2>
 
 <form id="formulario">
 
@@ -158,12 +176,21 @@ grid-template-columns:1fr;
 
 <div class="campo">
 <label>Solicitante</label>
-<input name="solicitante" required>
+<input name="solicitante" required placeholder="Digite o solicitante">
 </div>
 
 <div class="campo">
 <label>Lotação</label>
-<input name="lotacao" required>
+<select name="lotacao" id="lotacao" required>
+<option value="">Carregando...</option>
+</select>
+</div>
+
+<div class="campo">
+<label>Tipo de Pesquisa</label>
+<select name="tipo" id="tipo" required>
+<option value="">Carregando...</option>
+</select>
 </div>
 
 <div class="campo">
@@ -177,18 +204,10 @@ grid-template-columns:1fr;
 </div>
 
 <div class="campo">
-<label>Tipo de Requisição</label>
-<input name="tipo" required>
-</div>
-
-<div class="campo full">
-<label>Descrição</label>
-<textarea name="descricao" required></textarea>
-</div>
-
-<div class="campo">
 <label>Responsável</label>
-<input name="responsavel">
+<select name="responsavel" id="responsavel" required>
+<option value="">Carregando...</option>
+</select>
 </div>
 
 <div class="campo">
@@ -196,8 +215,19 @@ grid-template-columns:1fr;
 <input name="participantes">
 </div>
 
+<!-- 🔥 NOVO CAMPO -->
+<div class="campo">
+<label>Quantidade / Volume</label>
+<input name="quantidade" type="number" min="1" placeholder="Ex: 10">
+</div>
+
 <div class="campo full">
-<button id="btnEnviar" type="submit">Registrar Requisição</button>
+<label>Descrição</label>
+<textarea name="descricao" required></textarea>
+</div>
+
+<div class="campo full">
+<button id="btnEnviar" type="submit">Registrar Pesquisa</button>
 </div>
 
 </div>
@@ -208,17 +238,64 @@ grid-template-columns:1fr;
 
 </div>
 
-<!-- LOADING -->
 <div id="loading" class="loading">
   <div class="spinner"></div>
 </div>
 
 <script>
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec";
+
 const form = document.getElementById("formulario");
 const msg = document.getElementById("mensagem");
 const loading = document.getElementById("loading");
 const btn = document.getElementById("btnEnviar");
 
+// 🔥 CARREGA DADOS
+fetch(URL_SCRIPT)
+.then(res => res.json())
+.then(data => {
+
+const usuarios = document.getElementById("responsavel");
+const lotacoes = document.getElementById("lotacao");
+const tipos = document.getElementById("tipo");
+
+usuarios.innerHTML = '<option value="">Selecione</option>';
+lotacoes.innerHTML = '<option value="">Selecione</option>';
+tipos.innerHTML = '<option value="">Selecione</option>';
+
+if(data.tipos){
+  data.tipos.forEach(t => {
+    let opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    tipos.appendChild(opt);
+  });
+}
+
+if(data.usuarios){
+  data.usuarios.forEach(u => {
+    let opt = document.createElement("option");
+    opt.value = u;
+    opt.textContent = u;
+    usuarios.appendChild(opt);
+  });
+}
+
+if(data.lotacoes){
+  data.lotacoes.forEach(l => {
+    let opt = document.createElement("option");
+    opt.value = l;
+    opt.textContent = l;
+    lotacoes.appendChild(opt);
+  });
+}
+
+})
+.catch(() => {
+  alert("Erro ao carregar dados da API");
+});
+
+// 🔥 ENVIO
 form.addEventListener("submit", function(e){
   e.preventDefault();
 
@@ -226,26 +303,32 @@ form.addEventListener("submit", function(e){
 
   loading.style.display = "flex";
   btn.disabled = true;
+  btn.innerText = "Enviando...";
 
-  fetch("https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec", {
+  fetch(URL_SCRIPT, {
     method: "POST",
-    body: dados,
-    mode: "no-cors"
+    body: dados
   })
+  .then(res => res.text())
   .then(() => {
     msg.style.display = "block";
     msg.className = "msg sucesso";
-    msg.innerText = "Requisição registrada com sucesso!";
+    msg.innerText = "Pesquisa registrada com sucesso!";
     form.reset();
+
+    document.getElementById("lotacao").selectedIndex = 0;
+    document.getElementById("tipo").selectedIndex = 0;
+    document.getElementById("responsavel").selectedIndex = 0;
   })
   .catch(() => {
     msg.style.display = "block";
     msg.className = "msg erro";
-    msg.innerText = "Erro ao enviar requisição.";
+    msg.innerText = "Erro ao enviar.";
   })
   .finally(() => {
     loading.style.display = "none";
     btn.disabled = false;
+    btn.innerText = "Registrar Pesquisa";
   });
 });
 </script>
