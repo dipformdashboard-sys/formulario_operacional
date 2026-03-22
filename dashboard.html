@@ -15,6 +15,34 @@ body{
   padding:20px;
 }
 
+/* 🔷 HEADER */
+.topo{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo img{
+  height:40px;
+}
+
+.nav-btn{
+  background:#2563eb;
+  border:none;
+  padding:8px 12px;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* 🔷 TITULO */
 h1{
   text-align:center;
   margin-bottom:5px;
@@ -27,6 +55,7 @@ h1{
   margin-bottom:20px;
 }
 
+/* 🔷 CARDS */
 .cards{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
@@ -53,34 +82,39 @@ h1{
   color:#38bdf8;
 }
 
+/* 🔷 GRID */
 .container{
   display:grid;
   grid-template-columns:2fr 1fr;
   gap:15px;
 }
 
+/* 🔷 COLUNA */
 .coluna{
   display:flex;
   flex-direction:column;
   gap:15px;
 }
 
+/* 🔷 BOX */
 .box{
   background:#1e293b;
   padding:12px;
   border-radius:10px;
 }
 
+/* 🔥 CONTROLE REAL DO GRÁFICO */
 .chart-container{
   position:relative;
   width:100%;
-  height:220px;
+  height:230px;
 }
 
 .chart-container.grande{
-  height:300px;
+  height:320px;
 }
 
+/* 🔷 TABELA */
 .table-box{
   background:#1e293b;
   padding:15px;
@@ -112,6 +146,7 @@ button{
   cursor:pointer;
 }
 
+/* 📱 RESPONSIVO */
 @media(max-width:900px){
   .container{
     grid-template-columns:1fr;
@@ -122,9 +157,22 @@ button{
 
 <body>
 
-<h1>📊 Sumário de atividades - Núcleo de Assuntos Prisionais (NAP)</h1>
-<div class="refresh">Polícia Civil da Bahia, cada vez mais forte!</div>
+<!-- 🔷 TOPO -->
+<div class="topo">
+  <div class="logo">
+    <img src="PCBA.jpg">
+    <strong>NAP</strong>
+  </div>
 
+  <button class="nav-btn" onclick="window.location.href='index.html'">
+    ➕ Novo Registro
+  </button>
+</div>
+
+<h1>📊 Sumário de Atividades</h1>
+<div class="refresh">Atualiza automaticamente a cada 1 minuto</div>
+
+<!-- 🔷 CARDS -->
 <div class="cards">
   <div class="card">
     <p>Total</p>
@@ -140,18 +188,17 @@ button{
     <p>Lotações</p>
     <h2 id="lotacoes">0</h2>
   </div>
+
+  <div class="card">
+    <p>Volume Total</p>
+    <h2 id="volume">0</h2>
+  </div>
 </div>
 
 <div class="container">
 
+  <!-- ESQUERDA -->
   <div class="coluna">
-
-    <div class="box">
-      <h3>📍 Por Lotação</h3>
-      <div class="chart-container">
-        <canvas id="graficoLotacao"></canvas>
-      </div>
-    </div>
 
     <div class="box">
       <h3>📅 Por Data</h3>
@@ -160,8 +207,16 @@ button{
       </div>
     </div>
 
+    <div class="box">
+      <h3>📍 Por Lotação</h3>
+      <div class="chart-container">
+        <canvas id="graficoLotacao"></canvas>
+      </div>
+    </div>
+
   </div>
 
+  <!-- DIREITA -->
   <div class="coluna">
 
     <div class="box">
@@ -172,9 +227,9 @@ button{
     </div>
 
     <div class="box">
-      <h3>🏆 Top Responsáveis</h3>
+      <h3>📦 Volume por Tipo</h3>
       <div class="chart-container">
-        <canvas id="graficoResponsavel"></canvas>
+        <canvas id="graficoQuantidade"></canvas>
       </div>
     </div>
 
@@ -182,6 +237,7 @@ button{
 
 </div>
 
+<!-- 🔷 TABELA -->
 <div class="table-box">
   <h3>📄 Últimas Pesquisas</h3>
   <table>
@@ -245,18 +301,24 @@ fetch(URL)
   document.getElementById("hoje").innerText =
     rel.filter(r => formatarData(r.data) === hoje).length;
 
-  // LOTAÇÃO
+  // 🔷 VOLUME TOTAL
+  let volumeTotal = 0;
+  rel.forEach(r=>{
+    volumeTotal += Number(r.quantidade) || 0;
+  });
+  document.getElementById("volume").innerText = volumeTotal;
+
+  // 🔷 LOTAÇÃO
   const lot = {};
   rel.forEach(r => {
     const k = r.lotacao || "Sem";
     lot[k] = (lot[k] || 0) + 1;
   });
-
   document.getElementById("lotacoes").innerText = Object.keys(lot).length;
 
   criarGrafico("graficoLotacao","bar",Object.keys(lot),Object.values(lot));
 
-  // DATA
+  // 🔷 DATA
   const datas = {};
   rel.forEach(r => {
     const d = formatarData(r.data);
@@ -264,32 +326,26 @@ fetch(URL)
       datas[d] = (datas[d] || 0) + 1;
     }
   });
-
   criarGrafico("graficoData","line",Object.keys(datas),Object.values(datas));
 
-  // CANAL
+  // 🔷 CANAL
   const canais = {};
   rel.forEach(r => {
     const k = r.canal || "Sem";
     canais[k] = (canais[k] || 0) + 1;
   });
-
   criarGrafico("graficoCanal","doughnut",Object.keys(canais),Object.values(canais));
 
-  // RESPONSÁVEL
-  const resp = {};
+  // 🔷 QUANTIDADE POR TIPO
+  const qtd = {};
   rel.forEach(r => {
-    const k = r.responsavel || "Sem";
-    resp[k] = (resp[k] || 0) + 1;
+    const k = r.tipo || "Sem";
+    qtd[k] = (qtd[k] || 0) + (Number(r.quantidade) || 0);
   });
 
-  const top = Object.entries(resp)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,5);
-
-  criarGrafico("graficoResponsavel","bar",
-    top.map(i=>i[0]),
-    top.map(i=>i[1])
+  criarGrafico("graficoQuantidade","bar",
+    Object.keys(qtd),
+    Object.values(qtd)
   );
 
   renderTabela();
