@@ -3,6 +3,8 @@
 
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <title>Pesquisas Realizadas</title>
 
 <style>
@@ -24,14 +26,14 @@ box-shadow:0 8px 25px rgba(0,0,0,0.1);
 
 /* 🔷 TOPO */
 .topo{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-bottom:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
 }
 
 .logo{
-height:50px;
+height:150px;
 }
 
 .menu{
@@ -163,7 +165,6 @@ animation:spin 1s linear infinite;
 <div class="topo">
   <img src="PCBA.png" class="logo">
   <div class="menu">
-    <a href="index.html">📋 Formulário</a>
     <a href="dashboard.html">📊 Dashboard</a>
   </div>
 </div>
@@ -218,7 +219,7 @@ animation:spin 1s linear infinite;
 <!-- 🔥 NOVO CAMPO -->
 <div class="campo">
 <label>Quantidade / Volume</label>
-<input name="quantidade" type="number" min="1" placeholder="Ex: 10">
+<input name="quantidade" type="number" min="1" placeholder="Ex: 10" required>
 </div>
 
 <div class="campo full">
@@ -289,11 +290,41 @@ if(data.lotacoes){
     lotacoes.appendChild(opt);
   });
 }
-
+ativarBuscaSelects();
 })
 .catch(() => {
   alert("Erro ao carregar dados da API");
 });
+
+let selectLotacao, selectTipo, selectResponsavel, selectCanal;
+
+function ativarBuscaSelects(){
+
+  selectLotacao = new Choices('#lotacao', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+  selectTipo = new Choices('#tipo', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+  selectResponsavel = new Choices('#responsavel', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+  selectCanal = new Choices('[name="canal"]', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+}
 
 // 🔥 ENVIO
 form.addEventListener("submit", function(e){
@@ -316,9 +347,10 @@ form.addEventListener("submit", function(e){
     msg.innerText = "Pesquisa registrada com sucesso!";
     form.reset();
 
-    document.getElementById("lotacao").selectedIndex = 0;
-    document.getElementById("tipo").selectedIndex = 0;
-    document.getElementById("responsavel").selectedIndex = 0;
+    selectLotacao.removeActiveItems();
+    selectTipo.removeActiveItems();
+    selectResponsavel.removeActiveItems();
+    selectCanal.removeActiveItems();
   })
   .catch(() => {
     msg.style.display = "block";
