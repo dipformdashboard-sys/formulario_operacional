@@ -2,369 +2,397 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard de Requisições</title>
+<title>Dashboard NAP</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
   font-family:Arial;
-  background:#0f172a;
-  color:white;
+  background:#f8fafc;
+  color:#1e293b;
   margin:0;
   padding:20px;
 }
 
-/* 🔷 HEADER */
-.topo{
+/* HEADER */
+.header{
   display:flex;
+  align-items:center;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.logo{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.logo img{
-  height:40px;
-}
-
-.nav-btn{
-  background:#2563eb;
-  border:none;
-  padding:8px 12px;
-  color:white;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-/* 🔷 TITULO */
-h1{
-  text-align:center;
-  margin-bottom:5px;
-}
-
-.refresh{
-  text-align:center;
-  font-size:12px;
-  color:#94a3b8;
   margin-bottom:20px;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* 🔷 CARDS */
+.header img{ height:70px; }
+
+.titulo{
+  flex:1;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  color:#1e3a8a;
+}
+
+.btn{
+  background:#facc15;
+  color:#1e293b;
+  border:none;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+/* CARDS */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:10px;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
   margin-bottom:20px;
 }
 
 .card{
-  background:#1e293b;
-  padding:12px;
-  border-radius:10px;
+  background:white;
+  padding:20px;
+  border-radius:12px;
   text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  border-top:5px solid #facc15;
 }
 
 .card p{
   margin:0;
-  font-size:12px;
-  color:#94a3b8;
+  font-size:13px;
+  color:#64748b;
 }
 
 .card h2{
-  margin-top:5px;
-  font-size:22px;
-  color:#38bdf8;
+  margin-top:8px;
+  font-size:26px;
+  color:#1e3a8a;
 }
 
-/* 🔷 GRID */
-.container{
+/* FILTRO */
+.filtro{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:20px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+input{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #cbd5e1;
+}
+
+/* GRÁFICOS */
+.graficos{
   display:grid;
-  grid-template-columns:2fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:15px;
+  align-items:stretch;
 }
 
-/* 🔷 COLUNA */
-.coluna{
+.box{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  height:260px; /* 🔥 controla altura real */
   display:flex;
   flex-direction:column;
-  gap:15px;
 }
 
-/* 🔷 BOX */
-.box{
-  background:#1e293b;
-  padding:12px;
-  border-radius:10px;
+.box canvas{
+  flex:1;
 }
 
-/* 🔥 CONTROLE REAL DO GRÁFICO */
-.chart-container{
-  position:relative;
-  width:100%;
-  height:230px;
+.box h3{
+  color:#1e3a8a;
+  margin-bottom:10px;
 }
 
-.chart-container.grande{
-  height:320px;
+canvas{
+  width:100% !important;
+  height:220px !important;
 }
 
-/* 🔷 TABELA */
+/* TABELA */
 .table-box{
-  background:#1e293b;
+  margin-top:25px;
+  background:white;
   padding:15px;
-  border-radius:10px;
-  margin-top:15px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:12px;
+  font-size:13px;
 }
 
 th,td{
-  padding:6px;
-  border-bottom:1px solid #334155;
+  padding:10px;
+  border-bottom:1px solid #e2e8f0;
 }
 
 th{
-  color:#38bdf8;
+  color:#1e3a8a;
 }
 
-button{
-  background:#334155;
-  border:none;
-  color:white;
-  padding:5px 10px;
-  border-radius:5px;
-  cursor:pointer;
+tr:hover{
+  background:#f1f5f9;
 }
 
-/* 📱 RESPONSIVO */
+/* RESPONSIVO */
 @media(max-width:900px){
-  .container{
-    grid-template-columns:1fr;
-  }
+  .graficos{ grid-template-columns:1fr; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🔷 TOPO -->
-<div class="topo">
-  <div class="logo">
-    <img src="PCBA.png">
-    <strong>NAP</strong>
-  </div>
-
-  <button class="nav-btn" onclick="window.location.href='index.html'">
-    ➕ Novo Registro
-  </button>
+<div class="header">
+  <img src="logo.png">
+  <div class="titulo">Painel de Inteligência - NAP</div>
+  <button class="btn" onclick="location.href='index.html'">Novo Registro</button>
 </div>
 
-<h1>📊 Sumário de Atividades</h1>
-<div class="refresh">Atualiza automaticamente a cada 1 minuto</div>
-
-<!-- 🔷 CARDS -->
+<!-- INDICADORES -->
 <div class="cards">
-  <div class="card">
-    <p>Total</p>
-    <h2 id="total">0</h2>
-  </div>
-
-  <div class="card">
-    <p>Hoje</p>
-    <h2 id="hoje">0</h2>
-  </div>
-
-  <div class="card">
-    <p>Lotações</p>
-    <h2 id="lotacoes">0</h2>
-  </div>
-
-  <div class="card">
-    <p>Volume Total</p>
-    <h2 id="volume">0</h2>
-  </div>
+  <div class="card"><p>Total</p><h2 id="total"></h2></div>
+  <div class="card"><p>Hoje</p><h2 id="hoje"></h2></div>
+  <div class="card"><p>Semana</p><h2 id="semana"></h2></div>
+  <div class="card"><p>Mês</p><h2 id="mes"></h2></div>
+  <div class="card"><p>Ano</p><h2 id="ano"></h2></div>
 </div>
 
-<div class="container">
+<!-- FILTRO -->
+<div class="filtro">
+  <label>De:</label>
+  <input type="date" id="inicio">
+  <label>Até:</label>
+  <input type="date" id="fim">
+  <button class="btn" onclick="aplicarFiltro()">Filtrar</button>
+</div>
 
-  <!-- ESQUERDA -->
-  <div class="coluna">
+<!-- GRÁFICOS -->
+<div class="graficos">
 
-    <div class="box">
-      <h3>📅 Por Data</h3>
-      <div class="chart-container grande">
-        <canvas id="graficoData"></canvas>
-      </div>
-    </div>
-
-    <div class="box">
-      <h3>📍 Por Lotação</h3>
-      <div class="chart-container">
-        <canvas id="graficoLotacao"></canvas>
-      </div>
-    </div>
-
+  <div class="box">
+    <h3>📈 Histórico por Mês</h3>
+    <canvas id="historico"></canvas>
   </div>
 
-  <!-- DIREITA -->
-  <div class="coluna">
+  <div class="box">
+    <h3>📡 Canal</h3>
+    <canvas id="canal"></canvas>
+  </div>
 
-    <div class="box">
-      <h3>📡 Por Canal</h3>
-      <div class="chart-container">
-        <canvas id="graficoCanal"></canvas>
-      </div>
-    </div>
+  <div class="box">
+    <h3>📦 Tipo</h3>
+    <canvas id="tipo"></canvas>
+  </div>
 
-    <div class="box">
-      <h3>📦 Volume por Tipo</h3>
-      <div class="chart-container">
-        <canvas id="graficoQuantidade"></canvas>
-      </div>
-    </div>
-
+  <div class="box">
+    <h3>📍 Lotação</h3>
+    <canvas id="lotacao"></canvas>
   </div>
 
 </div>
 
-<!-- 🔷 TABELA -->
+<!-- TABELA -->
 <div class="table-box">
-  <h3>📄 Últimas Pesquisas</h3>
+  <h3>📄 Registros</h3>
   <table>
     <thead>
       <tr>
+        <th>Lotação</th>
+        <th>Tipo</th>
+        <th>Quantidade</th>
+        <th>Canal</th>
         <th>Descrição</th>
         <th>Responsável</th>
+        <th>Data</th>
       </tr>
     </thead>
     <tbody id="tabela"></tbody>
   </table>
-  <div id="paginacao"></div>
 </div>
 
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec";
 
+let dados = [];
 let charts = {};
-let dadosGlobais = [];
+
+let dadosFiltrados = [];
 let paginaAtual = 1;
-const porPagina = 10;
+const porPagina = 6;
 
-function formatarData(d){
-  if(!d) return null;
-  const data = new Date(d);
-  if(isNaN(data)) return null;
-  return data.toISOString().split("T")[0];
-}
-
-function criarGrafico(id, tipo, labels, data){
+function criar(id, tipo, labels, data){
   if(charts[id]) charts[id].destroy();
+
+  const cores = [
+    "#1e3a8a", // azul institucional
+    "#facc15", // amarelo
+    "#60a5fa", // azul claro
+    "#fde047", // amarelo claro
+    "#93c5fd",
+    "#fcd34d"
+  ];
 
   charts[id] = new Chart(document.getElementById(id), {
     type: tipo,
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data
+    data:{
+      labels,
+      datasets:[{
+        data,
+        backgroundColor: tipo === "line"
+          ? "rgba(250, 204, 21, 0.3)" // amarelo transparente
+          : cores,
+        borderColor: "#1e3a8a",
+        borderWidth: 2,
+        fill: tipo === "line",
+        tension: 0.4 // 🔥 deixa linha suave
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          labels:{
+            color:"#1e293b",
+            font:{ size:12 }
+          }
+        }
+      },
+      scales: tipo !== 'pie' && tipo !== 'doughnut' ? {
+        x:{
+          ticks:{ color:"#64748b" },
+          grid:{ color:"#e5e7eb" }
+        },
+        y:{
+          ticks:{ color:"#64748b" },
+          grid:{ color:"#e5e7eb" }
+        }
+      } : {}
     }
   });
 }
 
-function carregarDados(){
+function aplicarFiltro(){
+  const ini = document.getElementById("inicio").value;
+  const fim = document.getElementById("fim").value;
 
-fetch(URL)
-.then(r => r.json())
-.then(data => {
+  let filtrado = [...dados];
 
-  const rel = data.relatorio || [];
-  dadosGlobais = rel;
+  if(ini) filtrado = filtrado.filter(r => new Date(r.data) >= new Date(ini));
+  if(fim) filtrado = filtrado.filter(r => new Date(r.data) <= new Date(fim));
 
-  document.getElementById("total").innerText = rel.length;
+  processar(filtrado); // 🔥 só gráficos e tabela usam filtro
+}
 
-  const hoje = formatarData(new Date());
+function calcularIndicadoresBase(rel){
 
-  document.getElementById("hoje").innerText =
-    rel.filter(r => formatarData(r.data) === hoje).length;
+  let total=0, hoje=0, semana=0, mes=0, ano=0;
 
-  // 🔷 VOLUME TOTAL
-  let volumeTotal = 0;
+  const now = new Date();
+  const semanaIni = new Date();
+  semanaIni.setDate(now.getDate()-7);
+
   rel.forEach(r=>{
-    volumeTotal += Number(r.quantidade) || 0;
-  });
-  document.getElementById("volume").innerText = volumeTotal;
+    const d = new Date(r.data);
+    const q = Number(r.quantidade)||0;
 
-  // 🔷 LOTAÇÃO
-  const lot = {};
-  rel.forEach(r => {
-    const k = r.lotacao || "Sem";
-    lot[k] = (lot[k] || 0) + 1;
-  });
-  document.getElementById("lotacoes").innerText = Object.keys(lot).length;
+    total += q;
 
-  criarGrafico("graficoLotacao","bar",Object.keys(lot),Object.values(lot));
-
-  // 🔷 DATA
-  const datas = {};
-  rel.forEach(r => {
-    const d = formatarData(r.data);
-    if(d){
-      datas[d] = (datas[d] || 0) + 1;
-    }
-  });
-  criarGrafico("graficoData","line",Object.keys(datas),Object.values(datas));
-
-  // 🔷 CANAL
-  const canais = {};
-  rel.forEach(r => {
-    const k = r.canal || "Sem";
-    canais[k] = (canais[k] || 0) + 1;
-  });
-  criarGrafico("graficoCanal","doughnut",Object.keys(canais),Object.values(canais));
-
-  // 🔷 QUANTIDADE POR TIPO
-  const qtd = {};
-  rel.forEach(r => {
-    const k = r.tipo || "Sem";
-    qtd[k] = (qtd[k] || 0) + (Number(r.quantidade) || 0);
+    if(d.toDateString() === now.toDateString()) hoje += q;
+    if(d >= semanaIni) semana += q;
+    if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) mes += q;
+    if(d.getFullYear() === now.getFullYear()) ano += q;
   });
 
-  criarGrafico("graficoQuantidade","bar",
-    Object.keys(qtd),
-    Object.values(qtd)
-  );
+  totalEl.innerText = total;
+  hojeEl.innerText = hoje;
+  semanaEl.innerText = semana;
+  mesEl.innerText = mes;
+  anoEl.innerText = ano;
+}
 
-  renderTabela();
+function processar(rel){
 
-});
+  let total=0, hoje=0, semana=0, mes=0, ano=0;
+
+  const now = new Date();
+  const semanaIni = new Date();
+  semanaIni.setDate(now.getDate()-7);
+
+  rel.forEach(r=>{
+    const d = new Date(r.data);
+    const q = Number(r.quantidade)||0;
+
+    total += q;
+    if(d.toDateString()===now.toDateString()) hoje+=q;
+    if(d>=semanaIni) semana+=q;
+    if(d.getMonth()===now.getMonth()) mes+=q;
+    if(d.getFullYear()===now.getFullYear()) ano+=q;
+  });
+
+  const tipo={}, canal={}, lot={}, hist={};
+
+  rel.forEach(r=>{
+    const q = Number(r.quantidade)||0;
+
+    tipo[r.tipo||"Sem"]=(tipo[r.tipo]||0)+q;
+    canal[r.canal||"Sem"]=(canal[r.canal]||0)+q;
+    lot[r.lotacao||"Sem"]=(lot[r.lotacao]||0)+q;
+
+    const mesAno = new Date(r.data).toISOString().slice(0,7);
+    hist[mesAno]=(hist[mesAno]||0)+q;
+  });
+
+  criar("tipo","bar",Object.keys(tipo),Object.values(tipo));
+  criar("canal","pie",Object.keys(canal),Object.values(canal));
+  criar("lotacao","pie",Object.keys(lot),Object.values(lot));
+  criar("historico","line",Object.keys(hist),Object.values(hist));
+
+dadosFiltrados = rel.slice().reverse();
+paginaAtual = 1;
+renderTabela();
 }
 
 function renderTabela(){
+
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
 
-  const inicio = (paginaAtual-1)*porPagina;
-  const pagina = dadosGlobais.slice().reverse().slice(inicio, inicio+porPagina);
+  const inicio = (paginaAtual - 1) * porPagina;
+  const pagina = dadosFiltrados.slice(inicio, inicio + porPagina);
 
   pagina.forEach(r=>{
     tabela.innerHTML += `
       <tr>
-        <td>${r.descricao || "-"}</td>
-        <td>${r.responsavel || "-"}</td>
+        <td>${r.lotacao||"-"}</td>
+        <td>${r.tipo||"-"}</td>
+        <td>${r.quantidade||"-"}</td>
+        <td>${r.canal||"-"}</td>
+        <td>${r.descricao||"-"}</td>
+        <td>${r.responsavel||"-"}</td>
+        <td>${r.data ? new Date(r.data).toLocaleDateString() : "-"}</td>
       </tr>
     `;
   });
@@ -373,28 +401,53 @@ function renderTabela(){
 }
 
 function renderPaginacao(){
-  const total = Math.ceil(dadosGlobais.length/porPagina);
 
-  document.getElementById("paginacao").innerHTML = `
+  const totalPaginas = Math.ceil(dadosFiltrados.length / porPagina) || 1;
+
+  let html = `
     <button onclick="mudarPagina(-1)">◀</button>
-    Página ${paginaAtual} de ${total}
+    Página ${paginaAtual} de ${totalPaginas}
     <button onclick="mudarPagina(1)">▶</button>
   `;
+
+  let pagDiv = document.getElementById("paginacao");
+
+  if(!pagDiv){
+    pagDiv = document.createElement("div");
+    pagDiv.id = "paginacao";
+    pagDiv.style.textAlign = "center";
+    pagDiv.style.marginTop = "15px";
+    document.querySelector(".table-box").appendChild(pagDiv);
+  }
+
+  pagDiv.innerHTML = html;
 }
 
-function mudarPagina(d){
-  const total = Math.ceil(dadosGlobais.length/porPagina);
+function mudarPagina(direcao){
 
-  paginaAtual += d;
-  if(paginaAtual<1) paginaAtual=1;
-  if(paginaAtual>total) paginaAtual=total;
+  const totalPaginas = Math.ceil(dadosFiltrados.length / porPagina);
+
+  paginaAtual += direcao;
+
+  if(paginaAtual < 1) paginaAtual = 1;
+  if(paginaAtual > totalPaginas) paginaAtual = totalPaginas;
 
   renderTabela();
 }
 
-setInterval(carregarDados,60000);
-carregarDados();
+const totalEl = document.getElementById("total");
+const hojeEl = document.getElementById("hoje");
+const semanaEl = document.getElementById("semana");
+const mesEl = document.getElementById("mes");
+const anoEl = document.getElementById("ano");
 
+fetch(URL)
+.then(r=>r.json())
+.then(res=>{
+  dados = res.relatorio || [];
+  calcularIndicadoresBase(dados); // 🔥 sempre sem filtro
+  processar(dados); // 🔥 inicial com todos
+});
 </script>
 
 </body>
