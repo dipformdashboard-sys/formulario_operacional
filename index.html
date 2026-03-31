@@ -224,7 +224,14 @@ animation:spin 1s linear infinite;
 
 <div class="campo full">
 <label>Descrição</label>
-<textarea name="descricao" required></textarea>
+<select name="descricao" id="descricao" required>
+<option value="">Carregando...</option>
+</select>
+</div>
+
+<div class="campo full">
+<label>Observação</label>
+<textarea name="observacao" placeholder="Detalhes adicionais..."></textarea>
 </div>
 
 <div class="campo full">
@@ -259,10 +266,12 @@ fetch(URL_SCRIPT)
 const usuarios = document.getElementById("responsavel");
 const lotacoes = document.getElementById("lotacao");
 const tipos = document.getElementById("tipo");
+const descricoes = document.getElementById("descricao");
 
 usuarios.innerHTML = '<option value="">Selecione</option>';
 lotacoes.innerHTML = '<option value="">Selecione</option>';
 tipos.innerHTML = '<option value="">Selecione</option>';
+descricoes.innerHTML = '<option value="">Selecione</option>';
 
 if(data.tipos){
   data.tipos.forEach(t => {
@@ -290,13 +299,22 @@ if(data.lotacoes){
     lotacoes.appendChild(opt);
   });
 }
+
+if(data.descricoes){
+  data.descricoes.forEach(d => {
+    let opt = document.createElement("option");
+    opt.value = d;
+    opt.textContent = d;
+    descricoes.appendChild(opt);
+  });
+}
 ativarBuscaSelects();
 })
 .catch(() => {
   alert("Erro ao carregar dados da API");
 });
 
-let selectLotacao, selectTipo, selectResponsavel, selectCanal;
+let selectLotacao, selectTipo, selectResponsavel, selectCanal, selectDescricao;
 
 function ativarBuscaSelects(){
 
@@ -324,6 +342,11 @@ function ativarBuscaSelects(){
     shouldSort: false
   });
 
+  selectDescricao = new Choices('#descricao', {
+  searchEnabled: true,
+  itemSelectText: '',
+  shouldSort: false
+});
 }
 
 // 🔥 ENVIO
@@ -351,6 +374,7 @@ form.addEventListener("submit", function(e){
     selectTipo.removeActiveItems();
     selectResponsavel.removeActiveItems();
     selectCanal.removeActiveItems();
+    selectDescricao.removeActiveItems();
   })
   .catch(() => {
     msg.style.display = "block";
