@@ -196,11 +196,8 @@ animation:spin 1s linear infinite;
 
 <div class="campo">
 <label>Canal</label>
-<select name="canal">
-<option>Email</option>
-<option>Telefone</option>
-<option>WhatsApp</option>
-<option>Presencial</option>
+<select name="canal" id="canal" required>
+<option value="">Carregando...</option>
 </select>
 </div>
 
@@ -267,11 +264,13 @@ const usuarios = document.getElementById("responsavel");
 const lotacoes = document.getElementById("lotacao");
 const tipos = document.getElementById("tipo");
 const descricoes = document.getElementById("descricao");
+const canais = document.getElementById("canal");
 
 usuarios.innerHTML = '<option value="">Selecione</option>';
 lotacoes.innerHTML = '<option value="">Selecione</option>';
 tipos.innerHTML = '<option value="">Selecione</option>';
 descricoes.innerHTML = '<option value="">Selecione</option>';
+canais.innerHTML = '<option value="">Selecione</option>';
 
 if(data.tipos){
   data.tipos.forEach(t => {
@@ -279,6 +278,15 @@ if(data.tipos){
     opt.value = t;
     opt.textContent = t;
     tipos.appendChild(opt);
+  });
+}
+
+if(data.canais){
+  data.canais.forEach(c => {
+    let opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    canais.appendChild(opt);
   });
 }
 
