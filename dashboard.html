@@ -5,6 +5,7 @@
 <title>Dashboard NAP</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
 <style>
 body{
@@ -27,7 +28,7 @@ body{
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-.header img{ height:150px; }
+.header img{ height:70px; }
 
 .titulo{
   flex:1;
@@ -165,9 +166,10 @@ tr:hover{
 <body>
 
 <div class="header">
-  <img src="PCBA.png">
-  <div class="titulo">Sumário de atividades - Núcleo de Assuntos Prisionais (NAP)</div>
+  <img src="logo.png">
+  <div class="titulo">Painel de Inteligência - NAP</div>
   <button class="btn" onclick="location.href='index.html'">Novo Registro</button>
+  <button class="btn" onclick="gerarPDF()">Gerar PDF</button>
 </div>
 
 <!-- INDICADORES -->
@@ -235,24 +237,28 @@ tr:hover{
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec";
 
+Chart.register(ChartDataLabels); // 🔥 AQUI
+
 let dados = [];
 let charts = {};
 
 let dadosFiltrados = [];
 let paginaAtual = 1;
-const porPagina = 10;
+const porPagina = 6;
 
 function criar(id, tipo, labels, data){
   if(charts[id]) charts[id].destroy();
 
-  const cores = [
-    "#1e3a8a", // azul institucional
-    "#facc15", // amarelo
-    "#60a5fa", // azul claro
-    "#fde047", // amarelo claro
-    "#93c5fd",
-    "#fcd34d"
-  ];
+function gerarCores(qtd){
+  const cores = [];
+
+  for(let i = 0; i < qtd; i++){
+    const hue = (i * 360 / qtd); // distribui no círculo
+    cores.push(`hsl(${hue}, 70%, 55%)`);
+  }
+
+  return cores;
+}
 
   charts[id] = new Chart(document.getElementById(id), {
     type: tipo,
@@ -261,8 +267,8 @@ function criar(id, tipo, labels, data){
       datasets:[{
         data,
         backgroundColor: tipo === "line"
-          ? "rgba(250, 204, 21, 0.3)" // amarelo transparente
-          : cores,
+          ? "rgba(250, 204, 21, 0.3)"
+          : gerarCores(labels.length),
         borderColor: "#1e3a8a",
         borderWidth: 2,
         fill: tipo === "line",
@@ -278,6 +284,11 @@ function criar(id, tipo, labels, data){
             color:"#1e293b",
             font:{ size:12 }
           }
+        },
+        datalabels:{
+          color:"#000",
+          font:{ weight:"bold", size:10 },
+          formatter: (value) => value
         }
       },
       scales: tipo !== 'pie' && tipo !== 'doughnut' ? {
@@ -303,7 +314,18 @@ function aplicarFiltro(){
   if(ini) filtrado = filtrado.filter(r => new Date(r.data) >= new Date(ini));
   if(fim) filtrado = filtrado.filter(r => new Date(r.data) <= new Date(fim));
 
-  processar(filtrado); // 🔥 só gráficos e tabela usam filtro
+atualizarTotal(filtrado); // 🔥 só o TOTAL muda
+processar(filtrado);
+}
+
+function atualizarTotal(rel){
+  let total = 0;
+
+  rel.forEach(r=>{
+    total += Number(r.quantidade) || 0;
+  });
+
+  totalEl.innerText = total;
 }
 
 function calcularIndicadoresBase(rel){
@@ -445,9 +467,141 @@ fetch(URL)
 .then(r=>r.json())
 .then(res=>{
   dados = res.relatorio || [];
-  calcularIndicadoresBase(dados); // 🔥 sempre sem filtro
-  processar(dados); // 🔥 inicial com todos
+
+  calcularIndicadoresBase(dados); // 🔥 base fixa
+  atualizarTotal(dados); // 🔥 total inicial
+
+  processar(dados);
 });
+
+function gerarPDF(){
+
+  // 🔥 ordena por data (mais recente primeiro)
+  const dadosPDF = [...dadosFiltrados].sort(
+    (a,b)=> new Date(b.data) - new Date(a.data)
+  );
+
+  // 🔥 captura gráficos como imagem
+  const imgHistorico = charts.historico.toBase64Image();
+  const imgCanal = charts.canal.toBase64Image();
+  const imgTipo = charts.tipo.toBase64Image();
+  const imgLotacao = charts.lotacao.toBase64Image();
+
+  let conteudo = `
+    <html>
+    <head>
+      <title>Relatório NAP</title>
+      <style>
+        body{ font-family: Arial; padding:20px; }
+        h2{ text-align:center; margin-bottom:5px; }
+        .data{ text-align:center; font-size:12px; margin-bottom:20px; }
+
+        .graficos{
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:20px;
+          margin-bottom:30px;
+        }
+
+        .grafico{
+          text-align:center;
+        }
+
+        .grafico img{
+          width:100%;
+          max-height:250px;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+          font-size:11px;
+        }
+
+        th,td{
+          border:1px solid #ccc;
+          padding:5px;
+        }
+
+        th{
+          background:#facc15;
+        }
+      </style>
+    </head>
+    <body>
+
+    <h2>Relatório Completo - NAP</h2>
+    <div class="data">
+      Gerado em: ${new Date().toLocaleString()}
+    </div>
+
+    <div class="graficos">
+      <div class="grafico">
+        <h4>Histórico</h4>
+        <img src="${imgHistorico}">
+      </div>
+
+      <div class="grafico">
+        <h4>Canal</h4>
+        <img src="${imgCanal}">
+      </div>
+
+      <div class="grafico">
+        <h4>Tipo</h4>
+        <img src="${imgTipo}">
+      </div>
+
+      <div class="grafico">
+        <h4>Lotação</h4>
+        <img src="${imgLotacao}">
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lotação</th>
+          <th>Tipo</th>
+          <th>Qtd</th>
+          <th>Canal</th>
+          <th>Descrição</th>
+          <th>Responsável</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  // 🔥 tabela completa (SEM paginação)
+  dadosPDF.forEach(r=>{
+    conteudo += `
+      <tr>
+        <td>${r.lotacao||"-"}</td>
+        <td>${r.tipo||"-"}</td>
+        <td>${r.quantidade||"-"}</td>
+        <td>${r.canal||"-"}</td>
+        <td>${r.descricao||"-"}</td>
+        <td>${r.responsavel||"-"}</td>
+        <td>${r.data ? new Date(r.data).toLocaleDateString() : "-"}</td>
+      </tr>
+    `;
+  });
+
+  conteudo += `
+      </tbody>
+    </table>
+
+    </body>
+    </html>
+  `;
+
+  const win = window.open('', '', 'width=1000,height=800');
+  win.document.write(conteudo);
+  win.document.close();
+
+  win.focus();
+  win.print();
+}
 </script>
 
 </body>
