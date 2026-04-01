@@ -6,6 +6,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <style>
 body{
@@ -28,7 +30,7 @@ body{
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-.header img{ height:130px; }
+.header img{ height:70px; }
 
 .titulo{
   flex:1;
@@ -160,14 +162,32 @@ tr:hover{
 @media(max-width:900px){
   .graficos{ grid-template-columns:1fr; }
 }
+
+.filtro select {
+  min-width: 150px; /* ajusta aqui como quiser */
+}
+
+.choices {
+  min-width: 200px;
+  width: 210px; /* ou 250px se quiser maior */
+}
+.filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filtro label {
+  margin-left: 5px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <img src="PCBA.png">
-  <div class="titulo">Sumário de Ativiades - Núcleo de Assuntos Prisionais (NAP)</div>
+  <img src="logo.png">
+  <div class="titulo">Painel de Inteligência - NAP</div>
   <button class="btn" onclick="location.href='index.html'">Novo Registro</button>
   <button class="btn" onclick="gerarPDF()">Gerar PDF</button>
 </div>
@@ -185,8 +205,25 @@ tr:hover{
 <div class="filtro">
   <label>De:</label>
   <input type="date" id="inicio">
+
   <label>Até:</label>
   <input type="date" id="fim">
+
+  <label>Lotação:</label>
+  <select id="filtroLotacao">
+    <option value="">Todas</option>
+  </select>
+
+  <label>Tipo:</label>
+  <select id="filtroTipo">
+    <option value="">Todos</option>
+  </select>
+
+  <label>Canal:</label>
+  <select id="filtroCanal">
+    <option value="">Todos</option>
+  </select>
+
   <button class="btn" onclick="aplicarFiltro()">Filtrar</button>
 </div>
 
@@ -246,9 +283,6 @@ let dadosFiltrados = [];
 let paginaAtual = 1;
 const porPagina = 6;
 
-function criar(id, tipo, labels, data){
-  if(charts[id]) charts[id].destroy();
-
 function gerarCores(qtd){
   const cores = [];
 
@@ -259,6 +293,9 @@ function gerarCores(qtd){
 
   return cores;
 }
+
+function criar(id, tipo, labels, data){
+  if(charts[id]) charts[id].destroy();
 
   charts[id] = new Chart(document.getElementById(id), {
     type: tipo,
@@ -305,17 +342,57 @@ function gerarCores(qtd){
   });
 }
 
+let selectLot, selectCanal, selectTipo;
+
+function ativarBuscaFiltros(){
+
+  selectLot = new Choices('#filtroLotacao', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+  selectCanal = new Choices('#filtroCanal', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+  selectTipo = new Choices('#filtroTipo', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
+
+}
+
 function aplicarFiltro(){
+
   const ini = document.getElementById("inicio").value;
   const fim = document.getElementById("fim").value;
+  const lot = document.getElementById("filtroLotacao").value;
+  const canal = document.getElementById("filtroCanal").value;
+  const tipo = document.getElementById("filtroTipo").value; // 🔥 NOVO
 
   let filtrado = [...dados];
 
-  if(ini) filtrado = filtrado.filter(r => new Date(r.data) >= new Date(ini));
-  if(fim) filtrado = filtrado.filter(r => new Date(r.data) <= new Date(fim));
+  if(ini)
+    filtrado = filtrado.filter(r => new Date(r.data) >= new Date(ini));
 
-atualizarTotal(filtrado); // 🔥 só o TOTAL muda
-processar(filtrado);
+  if(fim)
+    filtrado = filtrado.filter(r => new Date(r.data) <= new Date(fim));
+
+  if(lot)
+    filtrado = filtrado.filter(r => r.lotacao === lot);
+
+  if(canal)
+    filtrado = filtrado.filter(r => r.canal === canal);
+
+  if(tipo)
+    filtrado = filtrado.filter(r => r.tipo === tipo); // 🔥 NOVO
+
+  atualizarTotal(filtrado);
+  processar(filtrado);
 }
 
 function atualizarTotal(rel){
@@ -397,6 +474,33 @@ paginaAtual = 1;
 renderTabela();
 }
 
+function preencherFiltros(rel){
+
+  const lotacoes = [...new Set(rel.map(r => r.lotacao).filter(Boolean))];
+  const canais = [...new Set(rel.map(r => r.canal).filter(Boolean))];
+  const tipos = [...new Set(rel.map(r => r.tipo).filter(Boolean))]; // 🔥 NOVO
+
+  const selectLot = document.getElementById("filtroLotacao");
+  const selectCanal = document.getElementById("filtroCanal");
+  const selectTipo = document.getElementById("filtroTipo"); // 🔥 NOVO
+
+  selectLot.innerHTML = '<option value="">Todas</option>';
+  selectCanal.innerHTML = '<option value="">Todos</option>';
+  selectTipo.innerHTML = '<option value="">Todos</option>'; // 🔥 NOVO
+
+  lotacoes.forEach(l => {
+    selectLot.innerHTML += `<option value="${l}">${l}</option>`;
+  });
+
+  canais.forEach(c => {
+    selectCanal.innerHTML += `<option value="${c}">${c}</option>`;
+  });
+
+  tipos.forEach(t => {
+    selectTipo.innerHTML += `<option value="${t}">${t}</option>`;
+  });
+}
+
 function renderTabela(){
 
   const tabela = document.getElementById("tabela");
@@ -468,9 +572,12 @@ fetch(URL)
 .then(res=>{
   dados = res.relatorio || [];
 
-  calcularIndicadoresBase(dados); // 🔥 base fixa
-  atualizarTotal(dados); // 🔥 total inicial
+  preencherFiltros(dados);
 
+  ativarBuscaFiltros(); // 🔥 AQUI
+
+  calcularIndicadoresBase(dados);
+  atualizarTotal(dados);
   processar(dados);
 });
 
