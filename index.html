@@ -210,7 +210,9 @@ animation:spin 1s linear infinite;
 
 <div class="campo">
 <label>Participantes</label>
-<input name="participantes">
+<select name="participantes" id="participantes" required>
+<option value="">Carregando...</option>
+</select>
 </div>
 
 <!-- 🔥 NOVO CAMPO -->
@@ -265,12 +267,14 @@ const lotacoes = document.getElementById("lotacao");
 const tipos = document.getElementById("tipo");
 const descricoes = document.getElementById("descricao");
 const canais = document.getElementById("canal");
+const participantes = document.getElementById("participantes");
 
 usuarios.innerHTML = '<option value="">Selecione</option>';
 lotacoes.innerHTML = '<option value="">Selecione</option>';
 tipos.innerHTML = '<option value="">Selecione</option>';
 descricoes.innerHTML = '<option value="">Selecione</option>';
 canais.innerHTML = '<option value="">Selecione</option>';
+participantes.innerHTML = '<option value="">Selecione</option>';
 
 if(data.tipos){
   data.tipos.forEach(t => {
@@ -287,6 +291,15 @@ if(data.canais){
     opt.value = c;
     opt.textContent = c;
     canais.appendChild(opt);
+  });
+}
+
+if(data.participantes){
+  data.participantes.forEach(p => {
+    let opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    participantes.appendChild(opt);
   });
 }
 
@@ -322,7 +335,7 @@ ativarBuscaSelects();
   alert("Erro ao carregar dados da API");
 });
 
-let selectLotacao, selectTipo, selectResponsavel, selectCanal, selectDescricao;
+let selectLotacao, selectTipo, selectResponsavel, selectCanal, selectDescricao, selectParticipantes;
 
 function ativarBuscaSelects(){
 
@@ -355,6 +368,12 @@ function ativarBuscaSelects(){
   itemSelectText: '',
   shouldSort: false
 });
+
+  selectParticipantes = new Choices('#participantes', {
+    searchEnabled: true,
+    itemSelectText: '',
+    shouldSort: false
+  });
 }
 
 // 🔥 ENVIO
@@ -383,6 +402,7 @@ form.addEventListener("submit", function(e){
     selectResponsavel.removeActiveItems();
     selectCanal.removeActiveItems();
     selectDescricao.removeActiveItems();
+    selectParticipantes.removeActiveItems();
   })
   .catch(() => {
     msg.style.display = "block";
