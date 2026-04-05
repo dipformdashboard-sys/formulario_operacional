@@ -2,420 +2,333 @@
 <html lang="pt-br">
 
 <head>
-<meta charset="UTF-8">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-<title>Atividades Realizadas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <title>Atividades Realizadas</title>
 
-<style>
-body{
-font-family:Arial, sans-serif;
-background:#eef2f6;
-padding:40px;
-margin:0;
-}
+    <style>
+        /* 🎨 RESET E FONTES */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            padding-top: 90px;
+            color: #334155;
+        }
 
-.container{
-max-width:900px;
-margin:auto;
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 8px 25px rgba(0,0,0,0.1);
-}
+        /* 🔷 BARRA SUPERIOR */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 75px;
+            background: #1e3a8a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
 
-/* 🔷 TOPO */
-.topo{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-.logo{
-height:150px;
-}
+        .navbar .logo {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
 
-.menu{
-display:flex;
-gap:10px;
-}
+        .navbar h1 {
+            color: #ffffff;
+            font-size: 22px;
+            margin: 0;
+            font-weight: 600;
+        }
 
-.menu a{
-text-decoration:none;
-background:#2563eb;
-color:white;
-padding:8px 15px;
-border-radius:6px;
-font-size:14px;
-}
+        .navbar-right a {
+            text-decoration: none;
+            background: #eab308;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
 
-.menu a:hover{
-background:#1d4ed8;
-}
+        .navbar-right a:hover {
+            background: #facc15;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
 
-h2{
-margin-bottom:25px;
-color:#1e293b;
-text-align:center;
-}
+        /* 📦 CONTAINER LARGO TOTAL */
+        .container {
+            max-width: 98%;
+            margin: 0 auto 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+        }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-}
+        .container h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #0f172a;
+            font-size: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
 
-.campo{
-display:flex;
-flex-direction:column;
-}
+        /* 🔲 GRID ORGANIZADO */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* Sistema de 6 colunas para flexibilidade */
+            gap: 20px;
+        }
 
-.full{
-grid-column:1 / -1;
-}
+        .campo {
+            display: flex;
+            flex-direction: column;
+            grid-column: span 2; /* Padrão: 3 campos por linha (6/2 = 3) */
+        }
 
-label{
-font-weight:600;
-font-size:14px;
-color:#334155;
-margin-bottom:5px;
-}
+        /* Ajuste para 2 campos por linha (6/3 = 2) */
+        .metade {
+            grid-column: span 3;
+        }
 
-input,select,textarea{
-padding:10px;
-border:1px solid #cbd5e1;
-border-radius:6px;
-font-size:14px;
-width:100%;
-box-sizing:border-box;
-}
+        .full {
+            grid-column: span 6;
+        }
 
-textarea{
-resize:none;
-height:100px;
-}
+        label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
 
-button{
-background:#2563eb;
-color:white;
-border:none;
-padding:14px;
-width:100%;
-font-size:16px;
-border-radius:6px;
-cursor:pointer;
-}
+        input, textarea {
+            padding: 0 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #f8fafc;
+            height: 42px;
+        }
 
-button:disabled{
-background:#9ca3af;
-}
+        textarea {
+            height: 80px;
+            padding: 10px 14px;
+        }
 
-.msg{
-margin-top:20px;
-padding:12px;
-border-radius:6px;
-display:none;
-text-align:center;
-}
+        /* 🎨 CHOICES.JS CUSTOMIZADO */
+        .choices__inner {
+            background-color: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            min-height: 42px !important;
+            padding: 2px 10px !important;
+            display: flex;
+            align-items: center;
+        }
 
-.sucesso{background:#d1fae5;color:#065f46;}
-.erro{background:#fee2e2;color:#7f1d1d;}
+        /* Participantes mais compacto */
+        .choices__list--multiple .choices__item {
+            background-color: #1e3a8a !important;
+            border: none !important;
+            border-radius: 4px !important;
+            font-size: 11px !important;
+            padding: 1px 5px !important;
+            margin: 2px !important;
+        }
 
-.loading{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.5);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-display:none;
-}
+        .choices__input {
+            background-color: transparent !important;
+            font-size: 13px !important;
+        }
 
-.spinner{
-width:60px;
-height:60px;
-border:6px solid #ddd;
-border-top:6px solid #2563eb;
-border-radius:50%;
-animation:spin 1s linear infinite;
-}
+        /* 🔘 BOTÃO */
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
 
-@keyframes spin{
-0%{transform:rotate(0deg);}
-100%{transform:rotate(360deg);}
-}
+        button:hover { background: #1d4ed8; }
 
-@media(max-width:700px){
-.grid{grid-template-columns:1fr;}
-.topo{flex-direction:column; gap:10px;}
-}
-</style>
+        /* ⏳ LOADING */
+        .loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); display: none;
+            align-items: center; justify-content: center; z-index: 9999;
+        }
+        .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        @media(max-width: 1000px) {
+            .campo, .metade { grid-column: span 3; }
+        }
+        @media(max-width: 600px) {
+            .campo, .metade, .full { grid-column: span 6; }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
+    <header class="navbar">
+        <div class="navbar-left">
+            <img src="PCBA.png" alt="Logo" class="logo">
+            <h1>Atividades Realizadas</h1>
+        </div>
+        <div class="navbar-right">
+            <a href="dashboard.html">📊 Dashboard</a>
+        </div>
+    </header>
 
-<!-- 🔷 TOPO COM LOGO E MENU -->
-<div class="topo">
-  <img src="PCBA.png" class="logo">
-  <div class="menu">
-    <a href="dashboard.html">📊 Dashboard</a>
-  </div>
-</div>
+    <div class="container">
+        <h2>Registro de Nova Atividade</h2>
 
-<h2>Atividades Realizadas</h2>
+        <form id="formulario">
+            <div class="grid">
+                <div class="campo">
+                    <label>Solicitante</label>
+                    <input name="solicitante" required placeholder="Nome">
+                </div>
+                <div class="campo">
+                    <label>Lotação</label>
+                    <select name="lotacao" id="lotacao" required><option value="">Carregando...</option></select>
+                </div>
+                <div class="campo">
+                    <label>Responsável</label>
+                    <select name="responsavel" id="responsavel" required><option value="">Carregando...</option></select>
+                </div>
 
-<form id="formulario">
+                <div class="campo">
+                    <label>Tipo de Pesquisa</label>
+                    <select name="tipo" id="tipo" required><option value="">Carregando...</option></select>
+                </div>
+                <div class="campo">
+                    <label>Canal</label>
+                    <select name="canal" id="canal" required><option value="">Carregando...</option></select>
+                </div>
+                <div class="campo">
+                    <label>Data</label>
+                    <input type="date" name="data" id="data">
+                </div>
 
-<div class="grid">
+                <div class="metade">
+                    <label>Participantes (Múltiplos)</label>
+                    <select name="participantes" id="participantes" multiple required></select>
+                </div>
+                <div class="metade">
+                    <label>Quantidade / Volume</label>
+                    <input name="quantidade" type="number" min="1" required placeholder="Ex: 10">
+                </div>
 
-<div class="campo">
-<label>Solicitante</label>
-<input name="solicitante" required placeholder="Digite o solicitante">
-</div>
+                <div class="full">
+                    <label>Descrição</label>
+                    <select name="descricao" id="descricao" required><option value="">Carregando...</option></select>
+                </div>
 
-<div class="campo">
-<label>Lotação</label>
-<select name="lotacao" id="lotacao" required>
-<option value="">Carregando...</option>
-</select>
-</div>
+                <div class="full">
+                    <label>Observação</label>
+                    <textarea name="observacao" placeholder="Detalhes adicionais importantes..."></textarea>
+                </div>
 
-<div class="campo">
-<label>Tipo de Pesquisa</label>
-<select name="tipo" id="tipo" required>
-<option value="">Carregando...</option>
-</select>
-</div>
+                <div class="full">
+                    <button id="btnEnviar" type="submit">Finalizar e Registrar</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-<div class="campo">
-<label>Canal</label>
-<select name="canal" id="canal" required>
-<option value="">Carregando...</option>
-</select>
-</div>
+    <div id="loading" class="loading"><div class="spinner"></div></div>
 
-<div class="campo">
-<label>Responsável</label>
-<select name="responsavel" id="responsavel" required>
-<option value="">Carregando...</option>
-</select>
-</div>
+    <script>
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec";
+        const form = document.getElementById("formulario");
+        const loading = document.getElementById("loading");
 
-<div class="campo">
-<label>Participantes</label>
-<select name="participantes" id="participantes" required>
-<option value="">Carregando...</option>
-</select>
-</div>
+        fetch(URL_SCRIPT)
+            .then(res => res.json())
+            .then(data => {
+                const fillSelect = (id, items) => {
+                    const el = document.getElementById(id);
+                    el.innerHTML = id === 'participantes' ? '' : '<option value="">Selecione</option>';
+                    if(items) items.forEach(i => {
+                        let opt = document.createElement("option");
+                        opt.value = i; opt.textContent = i;
+                        el.appendChild(opt);
+                    });
+                };
+                fillSelect("responsavel", data.usuarios);
+                fillSelect("lotacao", data.lotacoes);
+                fillSelect("tipo", data.tipos);
+                fillSelect("descricao", data.descricoes);
+                fillSelect("canal", data.canais);
+                fillSelect("participantes", data.participantes);
+                ativarBuscaSelects();
+            });
 
-<!-- 🔥 NOVO CAMPO -->
-<div class="campo">
-<label>Quantidade / Volume</label>
-<input name="quantidade" type="number" min="1" placeholder="Ex: 10" required>
-</div>
+        let sLot, sTip, sRes, sCan, sDes, sPar;
 
-<div class="campo full">
-<label>Descrição</label>
-<select name="descricao" id="descricao" required>
-<option value="">Carregando...</option>
-</select>
-</div>
+        function ativarBuscaSelects() {
+            const cfg = { searchEnabled: true, itemSelectText: '', shouldSort: false };
+            sLot = new Choices('#lotacao', cfg);
+            sTip = new Choices('#tipo', cfg);
+            sRes = new Choices('#responsavel', cfg);
+            sCan = new Choices('#canal', cfg);
+            sDes = new Choices('#descricao', cfg);
+            sPar = new Choices('#participantes', { ...cfg, removeItemButton: true, placeholderValue: 'Adicionar nomes...' });
+        }
 
-<div class="campo full">
-<label>Observação</label>
-<textarea name="observacao" placeholder="Detalhes adicionais..."></textarea>
-</div>
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const dados = new FormData(form);
+            if (!dados.get("data")) dados.set("data", new Date().toISOString().split("T")[0]);
+            const particip = dados.getAll("participantes");
+            if(particip.length > 0) dados.set("participantes", particip.join(", "));
 
-<div class="campo full">
-<button id="btnEnviar" type="submit">Registrar Pesquisa</button>
-</div>
+            loading.style.display = "flex";
+            document.getElementById("btnEnviar").disabled = true;
 
-</div>
-
-</form>
-
-<div id="mensagem" class="msg"></div>
-
-</div>
-
-<div id="loading" class="loading">
-  <div class="spinner"></div>
-</div>
-
-<script>
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbz5UKYgpRxCjUJx6ilQBWDzO-StPxs4w214VWNanoXPKCaDYrgBK4bPRNAAIooia-5SnA/exec";
-
-const form = document.getElementById("formulario");
-const msg = document.getElementById("mensagem");
-const loading = document.getElementById("loading");
-const btn = document.getElementById("btnEnviar");
-
-// 🔥 CARREGA DADOS
-fetch(URL_SCRIPT)
-.then(res => res.json())
-.then(data => {
-
-const usuarios = document.getElementById("responsavel");
-const lotacoes = document.getElementById("lotacao");
-const tipos = document.getElementById("tipo");
-const descricoes = document.getElementById("descricao");
-const canais = document.getElementById("canal");
-const participantes = document.getElementById("participantes");
-
-usuarios.innerHTML = '<option value="">Selecione</option>';
-lotacoes.innerHTML = '<option value="">Selecione</option>';
-tipos.innerHTML = '<option value="">Selecione</option>';
-descricoes.innerHTML = '<option value="">Selecione</option>';
-canais.innerHTML = '<option value="">Selecione</option>';
-participantes.innerHTML = '<option value="">Selecione</option>';
-
-if(data.tipos){
-  data.tipos.forEach(t => {
-    let opt = document.createElement("option");
-    opt.value = t;
-    opt.textContent = t;
-    tipos.appendChild(opt);
-  });
-}
-
-if(data.canais){
-  data.canais.forEach(c => {
-    let opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    canais.appendChild(opt);
-  });
-}
-
-if(data.participantes){
-  data.participantes.forEach(p => {
-    let opt = document.createElement("option");
-    opt.value = p;
-    opt.textContent = p;
-    participantes.appendChild(opt);
-  });
-}
-
-if(data.usuarios){
-  data.usuarios.forEach(u => {
-    let opt = document.createElement("option");
-    opt.value = u;
-    opt.textContent = u;
-    usuarios.appendChild(opt);
-  });
-}
-
-if(data.lotacoes){
-  data.lotacoes.forEach(l => {
-    let opt = document.createElement("option");
-    opt.value = l;
-    opt.textContent = l;
-    lotacoes.appendChild(opt);
-  });
-}
-
-if(data.descricoes){
-  data.descricoes.forEach(d => {
-    let opt = document.createElement("option");
-    opt.value = d;
-    opt.textContent = d;
-    descricoes.appendChild(opt);
-  });
-}
-ativarBuscaSelects();
-})
-.catch(() => {
-  alert("Erro ao carregar dados da API");
-});
-
-let selectLotacao, selectTipo, selectResponsavel, selectCanal, selectDescricao, selectParticipantes;
-
-function ativarBuscaSelects(){
-
-  selectLotacao = new Choices('#lotacao', {
-    searchEnabled: true,
-    itemSelectText: '',
-    shouldSort: false
-  });
-
-  selectTipo = new Choices('#tipo', {
-    searchEnabled: true,
-    itemSelectText: '',
-    shouldSort: false
-  });
-
-  selectResponsavel = new Choices('#responsavel', {
-    searchEnabled: true,
-    itemSelectText: '',
-    shouldSort: false
-  });
-
-  selectCanal = new Choices('[name="canal"]', {
-    searchEnabled: true,
-    itemSelectText: '',
-    shouldSort: false
-  });
-
-  selectDescricao = new Choices('#descricao', {
-  searchEnabled: true,
-  itemSelectText: '',
-  shouldSort: false
-});
-
-  selectParticipantes = new Choices('#participantes', {
-    searchEnabled: true,
-    itemSelectText: '',
-    shouldSort: false
-  });
-}
-
-// 🔥 ENVIO
-form.addEventListener("submit", function(e){
-  e.preventDefault();
-
-  const dados = new FormData(form);
-
-  loading.style.display = "flex";
-  btn.disabled = true;
-  btn.innerText = "Enviando...";
-
-  fetch(URL_SCRIPT, {
-    method: "POST",
-    body: dados
-  })
-  .then(res => res.text())
-  .then(() => {
-    msg.style.display = "block";
-    msg.className = "msg sucesso";
-    msg.innerText = "Pesquisa registrada com sucesso!";
-    form.reset();
-
-    selectLotacao.removeActiveItems();
-    selectTipo.removeActiveItems();
-    selectResponsavel.removeActiveItems();
-    selectCanal.removeActiveItems();
-    selectDescricao.removeActiveItems();
-    selectParticipantes.removeActiveItems();
-  })
-  .catch(() => {
-    msg.style.display = "block";
-    msg.className = "msg erro";
-    msg.innerText = "Erro ao enviar.";
-  })
-  .finally(() => {
-    loading.style.display = "none";
-    btn.disabled = false;
-    btn.innerText = "Registrar Pesquisa";
-  });
-});
-</script>
-
+            fetch(URL_SCRIPT, { method: "POST", body: dados })
+                .then(() => {
+                    alert("Atividade registrada com sucesso!");
+                    form.reset();
+                    [sLot, sTip, sRes, sCan, sDes, sPar].forEach(s => s.removeActiveItems());
+                })
+                .finally(() => {
+                    loading.style.display = "none";
+                    document.getElementById("btnEnviar").disabled = false;
+                });
+        });
+    </script>
 </body>
 </html>
