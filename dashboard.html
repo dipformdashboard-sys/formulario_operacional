@@ -27,7 +27,6 @@
         }
 
         /* NAVBAR */
-        /* 🔷 BARRA SUPERIOR */
         .navbar {
             position: fixed;
             top: 0;
@@ -141,13 +140,18 @@
                 page-break-inside: avoid;
             }
 
-            /* Forçar quebra de página a cada dois gráficos */
             .chart-box:nth-of-type(2n) {
                 page-break-after: always;
             }
 
-            .table-box { border: 1px solid #eee; page-break-before: auto; }
-            table { font-size: 10px; width: 100%; }
+            /* AJUSTE PARA LISTA COMPLETA NO PDF */
+            .table-box { 
+                border: none; 
+                overflow: visible !important; 
+                height: auto !important; 
+                display: block !important;
+            }
+            table { font-size: 10px; width: 100%; table-layout: auto !important; }
             tr { page-break-inside: avoid; }
             
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -245,17 +249,16 @@ let paginaAtual = 1;
 const itensPorPagina = 10;
 let isPrinting = false;
 
-// Função personalizada para imprimir
 function prepararEImprimir() {
     isPrinting = true;
-    renderTabela(); // Renderiza tudo sem paginação
+    renderTabela(); 
     
-    // Pequeno delay para garantir que o DOM atualizou antes de chamar o print
+    // Aumentado para 800ms para garantir que o celular renderize a tabela gigante
     setTimeout(() => {
         window.print();
         isPrinting = false;
-        renderTabela(); // Restaura a paginação após fechar a janela de print
-    }, 200);
+        renderTabela(); 
+    }, 800);
 }
 
 function criar(id, tipo, labels, data){
@@ -377,10 +380,8 @@ function renderTabela() {
     let itensParaExibir;
     
     if (isPrinting) {
-        // Exibe todos os registros filtrados na impressão
         itensParaExibir = dadosFiltrados.slice().reverse();
     } else {
-        // Exibe paginado no navegador
         const inicio = (paginaAtual - 1) * itensPorPagina;
         const fim = inicio + itensPorPagina;
         itensParaExibir = dadosFiltrados.slice().reverse().slice(inicio, fim);
