@@ -317,16 +317,25 @@ function aplicarFiltro(){
     const tip = document.getElementById("filtroTipo").value;
     const can = document.getElementById("filtroCanal").value;
 
+    // Ajuste aqui: Forçamos o início para 00:00:00 e o fim para 23:59:59
+    const dataIni = ini ? new Date(ini + 'T00:00:00') : null;
+    const dataFim = fim ? new Date(fim + 'T23:59:59') : null;
+
     dadosFiltrados = dadosOriginal.filter(r => {
         let d = new Date(r.data);
         let ok = true;
-        if(ini) ok &= (d >= new Date(ini));
-        if(fim) ok &= (d <= new Date(fim));
+        
+        // Usamos as novas variáveis de data para comparar
+        if(dataIni) ok &= (d >= dataIni);
+        if(dataFim) ok &= (d <= dataFim);
+        
         if(lot) ok &= (r.lotacao === lot);
         if(tip) ok &= (r.tipo === tip);
         if(can) ok &= (r.canal === can);
+        
         return ok;
     });
+    
     paginaAtual = 1;
     processar(dadosFiltrados);
 }
