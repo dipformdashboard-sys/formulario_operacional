@@ -158,13 +158,32 @@
         }
 
         @media(max-width: 900px) { .graficos-grid { grid-template-columns: 1fr; } }
+
+        .btn-delete {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.btn-delete:hover {
+    background: #fca5a5;
+    color: #7f1d1d;
+}
+/* Esconder coluna de ação na impressão */
+@media print {
+    .col-action { display: none !important; }
+}
     </style>
 </head>
 <body>
 
 <header class="navbar">
     <div style="display:flex; align-items:center; gap:12px;">
-        <img src="PCBA.png" height="80">
+        <img src="PCBA.png" height="60">
         <h1>Sumário de Atividades - Núcleo de Assuntos Prisionais (NAP)</h1>
     </div>
     <div>
@@ -227,6 +246,7 @@
                 <th>Canal</th>
                 <th>Responsável</th>
                 <th>Data</th>
+                <th class="col-action">Ação</th> 
             </tr>
         </thead>
         <tbody id="tabela"></tbody>
@@ -388,7 +408,6 @@ function processar(rel){
 
 function renderTabela() {
     let itensParaExibir;
-    
     if (isPrinting) {
         itensParaExibir = dadosFiltrados.slice().reverse();
     } else {
@@ -399,21 +418,63 @@ function renderTabela() {
 
     const tb = document.getElementById("tabela");
     tb.innerHTML = itensParaExibir.map(r => `
-        <tr>
-            <td>${r.lotacao}</td>
-            <td>${r.tipo}</td>
-            <td>${r.descricao}</td>
-            <td><b>${r.quantidade}</b></td>
-            <td>${r.canal}</td>
-            <td>${r.responsavel}</td>
-            <td>${new Date(r.data).toLocaleDateString()}</td>
-        </tr>
-    `).join('');
+    <tr>
+        <td>${r.lotacao}</td>
+        <td>${r.tipo}</td>
+        <td>${r.descricao}</td>
+        <td><b>${r.quantidade}</b></td>
+        <td>${r.canal}</td>
+        <td>${r.responsavel}</td>
+        <td>${new Date(r.data).toLocaleDateString()}</td>
+        <td class="col-action">
+            <button class="btn-delete" onclick="excluirRegistro('${r.id}')" title="Excluir">
+                🗑️
+            </button>
+        </td>
+    </tr>
+`).join('');
 
     const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
     document.getElementById("pageInfo").innerText = `Página ${paginaAtual} de ${totalPaginas || 1}`;
     document.getElementById("prevPage").disabled = paginaAtual === 1;
     document.getElementById("nextPage").disabled = paginaAtual >= totalPaginas;
+}
+
+// 2. Nova função para deletar
+function excluirRegistro(id) {
+    if (!confirm("Tem certeza que deseja excluir este registro permanentemente?")) return;
+
+    // Seleciona o botão clicado de forma segura
+    const btn = window.event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "⏳";
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append("action", "delete");
+    formData.append("id", id);
+
+    fetch(URL, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "excluido" || data.status === "ok") {
+            alert("Registro excluído com sucesso!");
+            location.reload(); 
+        } else {
+            alert("Erro do servidor: " + (data.mensagem || "Não foi possível excluir"));
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro na conexão com o servidor.");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
 }
 
 function mudarPagina(dir) {
