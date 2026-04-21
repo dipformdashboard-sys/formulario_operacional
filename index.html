@@ -43,7 +43,7 @@
         }
 
         .navbar .logo {
-            height: 80px;
+            height: 60px;
             width: auto;
             object-fit: contain;
         }
@@ -94,17 +94,16 @@
         /* 🔲 GRID ORGANIZADO */
         .grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr); /* Sistema de 6 colunas para flexibilidade */
+            grid-template-columns: repeat(6, 1fr);
             gap: 20px;
         }
 
         .campo {
             display: flex;
             flex-direction: column;
-            grid-column: span 2; /* Padrão: 3 campos por linha (6/2 = 3) */
+            grid-column: span 2; 
         }
 
-        /* Ajuste para 2 campos por linha (6/3 = 2) */
         .metade {
             grid-column: span 3;
         }
@@ -149,7 +148,7 @@
             align-items: center;
         }
 
-        /* Participantes mais compacto */
+        /* Estilo para seleções múltiplas (Lotação e Participantes) */
         .choices__list--multiple .choices__item {
             background-color: #1e3a8a !important;
             border: none !important;
@@ -221,8 +220,8 @@
                     <input name="solicitante" required placeholder="Nome">
                 </div>
                 <div class="campo">
-                    <label>Lotação</label>
-                    <select name="lotacao" id="lotacao" required><option value="">Carregando...</option></select>
+                    <label>Lotação (Múltiplas)</label>
+                    <select name="lotacao" id="lotacao" multiple required></select>
                 </div>
                 <div class="campo">
                     <label>Responsável</label>
@@ -280,7 +279,8 @@
             .then(data => {
                 const fillSelect = (id, items) => {
                     const el = document.getElementById(id);
-                    el.innerHTML = id === 'participantes' ? '' : '<option value="">Selecione</option>';
+                    // Como lotação agora é múltiplo, ele não precisa da opção inicial vazia
+                    el.innerHTML = (id === 'participantes' || id === 'lotacao') ? '' : '<option value="">Selecione</option>';
                     if(items) items.forEach(i => {
                         let opt = document.createElement("option");
                         opt.value = i; opt.textContent = i;
@@ -300,34 +300,66 @@
 
         function ativarBuscaSelects() {
             const cfg = { searchEnabled: true, itemSelectText: '', shouldSort: false };
-            sLot = new Choices('#lotacao', cfg);
+            
+            // 🚀 Lotação agora recebe as mesmas configurações do participantes
+            sLot = new Choices('#lotacao', { ...cfg, removeItemButton: true, placeholderValue: 'Adicionar lotações...' });
+            sPar = new Choices('#participantes', { ...cfg, removeItemButton: true, placeholderValue: 'Adicionar nomes...' });
+            
             sTip = new Choices('#tipo', cfg);
             sRes = new Choices('#responsavel', cfg);
             sCan = new Choices('#canal', cfg);
             sDes = new Choices('#descricao', cfg);
-            sPar = new Choices('#participantes', { ...cfg, removeItemButton: true, placeholderValue: 'Adicionar nomes...' });
         }
 
-        form.addEventListener("submit", function (e) {
+        // 🚀 O submit agora foi transformado em "async" para lidar com as múltiplas requisições sequencialmente
+        form.addEventListener("submit", async function (e) {
             e.preventDefault();
-            const dados = new FormData(form);
-            if (!dados.get("data")) dados.set("data", new Date().toISOString().split("T")[0]);
-            const particip = dados.getAll("participantes");
-            if(particip.length > 0) dados.set("participantes", particip.join(", "));
+            const formValues = new FormData(form);
+
+            // 1. Coleta os arrays (pois agora são múltiplos)
+            const lotacoes = formValues.getAll("lotacao");
+            const particip = formValues.getAll("participantes");
+            
+            // 2. Prepara os dados fixos
+            const participantesString = particip.length > 0 ? particip.join(", ") : "";
+            const dataFinal = formValues.get("data") || new Date().toISOString().split("T")[0];
 
             loading.style.display = "flex";
             document.getElementById("btnEnviar").disabled = true;
 
-            fetch(URL_SCRIPT, { method: "POST", body: dados })
-                .then(() => {
-                    alert("Atividade registrada com sucesso!");
-                    form.reset();
-                    [sLot, sTip, sRes, sCan, sDes, sPar].forEach(s => s.removeActiveItems());
-                })
-                .finally(() => {
-                    loading.style.display = "none";
-                    document.getElementById("btnEnviar").disabled = false;
-                });
+            try {
+                // 3. 🚀 Loop Mágico: Faz um envio isolado para cada lotação selecionada
+                for (let lot of lotacoes) {
+                    const payload = new FormData();
+                    
+                    payload.append("solicitante", formValues.get("solicitante"));
+                    payload.append("responsavel", formValues.get("responsavel"));
+                    payload.append("tipo", formValues.get("tipo"));
+                    payload.append("canal", formValues.get("canal"));
+                    payload.append("quantidade", formValues.get("quantidade"));
+                    payload.append("descricao", formValues.get("descricao"));
+                    payload.append("observacao", formValues.get("observacao"));
+                    
+                    payload.append("data", dataFinal);
+                    payload.append("participantes", participantesString);
+                    
+                    // Adiciona a lotação exclusiva desta "rodada" do loop
+                    payload.append("lotacao", lot);
+
+                    // O "await" faz o JavaScript esperar o envio terminar antes de disparar a próxima lotação
+                    await fetch(URL_SCRIPT, { method: "POST", body: payload });
+                }
+
+                alert(lotacoes.length > 1 ? "Atividades registradas com sucesso!" : "Atividade registrada com sucesso!");
+                form.reset();
+                [sLot, sTip, sRes, sCan, sDes, sPar].forEach(s => s.removeActiveItems());
+            } catch (error) {
+                console.error(error);
+                alert("Houve um erro ao registrar. Verifique sua conexão e tente novamente.");
+            } finally {
+                loading.style.display = "none";
+                document.getElementById("btnEnviar").disabled = false;
+            }
         });
     </script>
 </body>
