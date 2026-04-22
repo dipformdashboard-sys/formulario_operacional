@@ -159,21 +159,25 @@
 
         @media(max-width: 900px) { .graficos-grid { grid-template-columns: 1fr; } }
 
-        .btn-delete {
-    background: #fee2e2;
-    color: #dc2626;
-    border: none;
-    padding: 5px 8px;
+    .btn-delete {
+    background: transparent;
+    color: #94a3b8; /* Cinza discreto */
+    border: 1px solid #e2e8f0;
+    padding: 2px 8px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
-    transition: 0.2s;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s;
 }
+
 .btn-delete:hover {
-    background: #fca5a5;
-    color: #7f1d1d;
+    background: #f1f5f9;
+    color: #ef4444; /* Fica vermelho apenas no hover para indicar perigo */
+    border-color: #fca5a5;
 }
-/* Esconder coluna de ação na impressão */
+
+/* Esconder coluna de ação na impressão para o PDF ficar limpo */
 @media print {
     .col-action { display: none !important; }
 }
@@ -418,21 +422,21 @@ function renderTabela() {
 
     const tb = document.getElementById("tabela");
     tb.innerHTML = itensParaExibir.map(r => `
-    <tr>
-        <td>${r.lotacao}</td>
-        <td>${r.tipo}</td>
-        <td>${r.descricao}</td>
-        <td><b>${r.quantidade}</b></td>
-        <td>${r.canal}</td>
-        <td>${r.responsavel}</td>
-        <td>${new Date(r.data).toLocaleDateString()}</td>
-        <td class="col-action">
-            <button class="btn-delete" onclick="excluirRegistro('${r.id}')" title="Excluir">
-                🗑️
-            </button>
-        </td>
-    </tr>
-`).join('');
+        <tr>
+            <td>${r.lotacao}</td>
+            <td>${r.tipo}</td>
+            <td>${r.descricao}</td>
+            <td><b>${r.quantidade}</b></td>
+            <td>${r.canal}</td>
+            <td>${r.responsavel}</td>
+            <td>${new Date(r.data).toLocaleDateString()}</td>
+            <td class="col-action">
+                <button class="btn-delete" onclick="excluirRegistro('${r.id}')" title="Excluir Registro">
+                    X
+                </button>
+            </td>
+        </tr>
+    `).join('');
 
     const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
     document.getElementById("pageInfo").innerText = `Página ${paginaAtual} de ${totalPaginas || 1}`;
